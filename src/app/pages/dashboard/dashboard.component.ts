@@ -1,6 +1,11 @@
-import { Component, Input, ViewChild } from "@angular/core";
-import { NbColorHelper, NbThemeService } from "@nebular/theme";
+import { Component, ViewChild, ElementRef } from "@angular/core";
 import * as Papa from "papaparse";
+import { DkbFields } from "../../shared/enums/dkb-fields";
+import {CommerzbankFields} from "../../shared/enums/commerzbank-fields";
+
+type ParsedData<T> = {
+  [key in keyof T]?: string;
+};
 
 @Component({
   selector: "ngx-dashboard",
@@ -8,96 +13,58 @@ import * as Papa from "papaparse";
   templateUrl: "./dashboard.component.html",
 })
 export class DashboardComponent {
-  @Input()
-  source = {};
+  @ViewChild("fileImportInput", { static: false }) fileImportInput: ElementRef;
 
-  options: any;
-  data: {};
-  themeSubscription: any;
+  DkbFields = DkbFields;
+  CommerzbankFields = CommerzbankFields;
 
-  constructor() {
-    // private theme: NbThemeService
-    this.data = {
-      labels: [
-        "Eating",
-        "Drinking",
-        "Sleeping",
-        "Designing",
-        "Coding",
-        "Cycling",
-        "Running",
-      ],
-      datasets: [
-        {
-          data: [65, 59, 90, 81, 56, 55, 40],
-          label: "Series A",
-          borderColor: 2,
-          backgroundColor: NbColorHelper.hexToRgbA("#516e9c", 0.5),
-        },
-        {
-          data: [28, 48, 40, 19, 96, 27, 100],
-          label: "Series B",
-          borderColor: 2,
-          backgroundColor: NbColorHelper.hexToRgbA("#516e9c", 0.5),
-        },
-      ],
-    };
+  revenue: number = 0;
+  outgoings: number = 0;
+  data: any[];
 
-    this.options = {
-      responsive: true,
-      maintainAspectRatio: false,
-      scaleFontColor: "white",
-      legend: {
-        labels: {
-          fontColor: 1,
-        },
-      },
-      scale: {
-        // pointLabels: {
-        //   fontSize: 14,
-        //   fontColor: 3,
-        // },
-        gridLines: {
-          color: 4,
-        },
-        angleLines: {
-          color: 5,
-        },
-      },
-    };
-  }
+  constructor() {}
 
-  dkbFields = [
-    "Buchungsdatum",
-    "Wertstellung",
-    "Status",
-    "Zahlungspflichtige*r",
-    "Zahlungsempfänger*in",
-    "Verwendungszweck",
-    "Umsatztyp",
-    "IBAN",
-    "Betrag (€)",
-    "Gläubiger-ID",
-    "Mandatsreferenz",
-    "Kundenreferenz",
-  ];
+  fileChangeListener<T>(event: any, fields: T): void {
+    if (!event.target.files) {
+      return;
+    }
 
-  @ViewChild("fileImportInput") fileImportInput: any;
-
-  fileChangeListener($event: any): void {
-    const file: File = $event.target.files[0];
+    const file: File = event.target.files[0];
     new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
         complete: (result) => {
-          console.log(result);
-          console.log(result["meta"]["fields"]);
-          resolve(result.data);
+          const data: ParsedData<T>[] = result.data as ParsedData<T>[];
+          data.forEach((element: ParsedData<T>) => {
+            const amount = element[fields["Amount"]];
+            const parsedAmount = parseFloat(
+              amount.replace(".", "").replace(",", ".")
+            );
+
+            this.calculateBudget(parsedAmount);
+            // console.log(parsedAmount);
+            // console.log(this.outgoings);
+          });
+
+          this.data = [
+            { value: this.revenue, name: "Einnahmen" },
+            { value: this.outgoings, name: "Ausgaben" },
+          ];
+
+          resolve(data);
         },
         error: (error) => {
           reject(error);
         },
       });
     });
+  }
+
+  private calculateBudget(amount: number): any {
+    if (amount > 0) {
+      this.revenue = this.revenue + amount;
+    } else {
+      this.outgoings = this.outgoings - amount;
+    }
   }
 }

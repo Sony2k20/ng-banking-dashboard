@@ -18,7 +18,7 @@
             #fileImportInput
             name="File Upload"
             id="csvFileUpload"
-            (change)="fileChangeListener($event)"
+            (change)="fileChangeListener($event, DkbFields)"
             accept=".csv"
           />
         </div>
@@ -26,4 +26,4 @@
     </nb-card>
   </div>
 </div>
-<chart type="line" [data]="data" [options]="options"></chart>
+<ngx-pie-chart [data]="data"></ngx-pie-chart>

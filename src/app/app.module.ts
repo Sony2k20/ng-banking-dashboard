@@ -27,6 +27,11 @@ import { AngularFireDatabaseModule } from "@angular/fire/compat/database";
 import { AngularFirestoreModule } from "@angular/fire/compat/firestore";
 import { AngularFireStorageModule } from "@angular/fire/compat/storage";
 
+import { registerLocaleData } from "@angular/common";
+import locale from "@angular/common/locales/de";
+
+registerLocaleData(locale, "de");
+
 @NgModule({
   declarations: [AppComponent],
   imports: [

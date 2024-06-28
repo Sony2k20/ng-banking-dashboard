@@ -10,14 +10,12 @@ import {
   NbListModule,
   NbIconModule,
 } from "@nebular/theme";
-import { NgxEchartsModule } from "ngx-echarts";
 
 import { ThemeModule } from "../../@theme/theme.module";
 import { DashboardComponent } from "./dashboard.component";
 import { FormsModule } from "@angular/forms";
-import { Ng2SmartTableModule } from "ng2-smart-table";
-import { ChartModule } from "angular2-chartjs";
-import { NgxChartsModule } from "@swimlane/ngx-charts";
+import { ChartsModule } from "../../components/charts/charts.module";
+import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
 
 @NgModule({
   imports: [
@@ -33,11 +31,9 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
     NbListModule,
     NbIconModule,
     NbButtonModule,
-    
-    NgxEchartsModule,
-    NgxChartsModule,
-    ChartModule,
+
+    ChartsModule,
   ],
-  declarations: [DashboardComponent],
+  declarations: [DashboardComponent, PieChartComponent],
 })
 export class DashboardModule {}
